@@ -31,7 +31,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(`${rootPath}/build/*`, {
       root: `${rootPath}/build/`,
-      exclude: ['.gitkeep'],
+      exclude: ['.gitkeep']
     }),
     extractStyles,
     new webpack.HotModuleReplacementPlugin(),
@@ -43,8 +43,8 @@ module.exports = {
       to: `${rootPath}/build/`
     }]),
     new webpack.DefinePlugin({
-      "ENV": JSON.stringify(env)
-    }),
+      'ENV': JSON.stringify(env)
+    })
   ],
   context: rootPath,
   resolve: {
@@ -89,13 +89,13 @@ module.exports = {
             sourceMap: true,
             includePaths: [`${rootPath}/src`],
             outputStyle: 'collapsed'
-          },
+          }
         }],
         fallback: 'style-loader'
       })
     }, {
       test: /\.css$/,
-      use: 'css-loader?sourceMap=true',
+      use: 'css-loader?sourceMap=true'
     }, {
       test: /\.(png|jpe?g|gif|svg|woff|woff2|eot|ttf)$/,
       use: 'file-loader?name=[name].[ext]&outputPath=./assets/'
@@ -111,9 +111,12 @@ module.exports = {
     publicPath: '/',
     historyApiFallback: {
       rewrites: [
-        {from: /./, to: '/'}
+        { from: /./, to: '/' }
       ]
     },
-    hot: true
+    hot: true,
+    proxy: {
+      '/api': 'http://localhost:8000'
+    }
   }
 };

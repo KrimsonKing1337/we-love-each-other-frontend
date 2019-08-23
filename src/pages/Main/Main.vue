@@ -1,6 +1,66 @@
 <script>
+  import axios from 'axios';
+  import { DateTime, Interval } from 'luxon';
+
   export default {
     name: 'Main',
+
+    data() {
+      return {
+        firstName: '',
+        firstLetter: '',
+        secondName: '',
+        secondLetter: '',
+        date: 0,
+        fromNow: '',
+        interval: null
+      };
+    },
+
+    created() {
+      axios.get('/api/pair/1')
+        .then((resp) => {
+          const { data } = resp;
+
+          this.performDataForPrint(data.data);
+
+          console.log('data', data);
+        })
+        .catch((err) => {
+          this.$toasted.show(err, {
+            type: 'error'
+          });
+
+          console.error(err);
+        });
+    },
+
+    mounted() {
+      this.interval = setInterval(() => {
+        const luxonDate = DateTime.fromISO(this.date);
+        const luxonInterval = Interval.fromDateTimes(luxonDate, DateTime.local());
+
+        this.fromNow = luxonInterval.count('days');
+      }, 1000);
+    },
+
+    methods: {
+      performDataForPrint(data) {
+        const { firstName, secondName, date } = data;
+
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.firstLetter = firstName[0].toUpperCase();
+        this.secondLetter = secondName[0].toUpperCase();
+        this.date = date;
+
+        const luxonDate = DateTime.fromISO(date);
+        const luxonInterval = Interval.fromDateTimes(luxonDate, DateTime.local());
+
+        this.fromNow = luxonInterval.count('days');
+      }
+    }
+
   };
 </script>
 
@@ -19,7 +79,7 @@
         <div class="empty" />
 
         <div class="second-name">
-          Н
+          {{ secondLetter }}
         </div>
       </div>
 
@@ -27,7 +87,7 @@
 
       <div class="right-side">
         <div class="first-name">
-          О
+          {{ firstLetter }}
         </div>
 
         <div class="empty" />
@@ -35,7 +95,7 @@
         <div class="border" />
 
         <div class="counter">
-          200 days
+          {{ fromNow }} days
         </div>
 
         <div class="empty" />
@@ -79,7 +139,6 @@
     height: 90%;
     width: 1px;
     background: #252525;
-    // margin: 0 0.75rem;
   }
 
   .title,
