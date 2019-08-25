@@ -18,7 +18,9 @@
     },
 
     created() {
-      axios.get('/api/pair/1')
+      const id = this.$route.params.id;
+
+      axios.get(`/api/pair/${id}`)
         .then((resp) => {
           const { data } = resp;
 
@@ -108,10 +110,7 @@
   @import "~common/styles/mixins";
 
   .main {
-    background: rgba(0, 0, 0, 1) url("/img/bg.jpg");
-    background-size: cover;
-    box-shadow: inset 0 0 0 15px #252525;
-    @include wrapper;
+    @include bg;
   }
 
   .wrapper {
