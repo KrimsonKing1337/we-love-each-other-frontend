@@ -2,11 +2,13 @@
   import {IMaskComponent} from 'vue-imask';
   import axios from 'axios';
   import { DateTime } from 'luxon';
+  import FormFieldMessages from './components/FormFieldMessages';
 
   export default {
     component: 'Create',
 
     components: {
+      FormFieldMessages,
       'imask-input': IMaskComponent
     },
 
@@ -33,9 +35,12 @@
         const {firstName, secondName, date} = data;
         const dateUTC = DateTime.fromFormat(date, 'dd.MM.yyyy').toISODate();
 
+        const firstNameForSend = firstName.length > 255 ? this.cutTooLongString(firstName) : firstName;
+        const secondNameForSend = secondName.length > 255 ? this.cutTooLongString(secondName) : secondName;
+
         axios.post('/api/pair', {
-          firstName,
-          secondName,
+          firstName: firstNameForSend,
+          secondName: secondNameForSend,
           date: dateUTC
         })
           .then((resp) => {
@@ -53,6 +58,9 @@
 
             console.error(err);
           });
+      },
+      cutTooLongString(str) {
+        return str.split('').slice(0, 255).join('');
       }
     }
   };
@@ -72,13 +80,10 @@
             v-model="model.firstName"
             required
             name="firstName"
+            maxlength="255"
           >
 
-          <field-messages name="firstName" show="$submitted">
-            <div slot="required">
-              First name is a required field
-            </div>
-          </field-messages>
+          <form-field-messages name="firstName" />
         </validate>
 
         <validate tag="label">
@@ -91,13 +96,10 @@
             v-model="model.secondName"
             name="secondName"
             required
+            maxlength="255"
           >
 
-          <field-messages name="secondName" show="$submitted">
-            <div slot="required">
-              Second name is a required field
-            </div>
-          </field-messages>
+          <form-field-messages name="secondName" />
         </validate>
 
         <validate tag="label">
@@ -112,13 +114,10 @@
             :mask="Date"
             :unmask="true"
             required
+            maxlength="255"
           />
 
-          <field-messages name="date" show="$submitted">
-            <div slot="required">
-              Relationship start date is a required field
-            </div>
-          </field-messages>
+          <form-field-messages name="date" />
         </validate>
 
         <button type="submit">
