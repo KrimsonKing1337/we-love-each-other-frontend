@@ -21,22 +21,20 @@
           firstName: '',
           secondName: '',
           date: ''
-        }
+        },
+        file: null
       }
     },
 
     methods: {
-      handleSubmit() {
-        if (this.formstate.$invalid) return;
-
-        this.submitForm(this.model);
-      },
-      submitForm(data) {
+      submitForm(data, file) {
         const {firstName, secondName, date} = data;
         const dateUTC = DateTime.fromFormat(date, 'dd.MM.yyyy').toISODate();
 
         const firstNameForSend = firstName.length > 255 ? this.cutTooLongString(firstName) : firstName;
         const secondNameForSend = secondName.length > 255 ? this.cutTooLongString(secondName) : secondName;
+
+        console.log('file', file); // todo: send file to server
 
         axios.post('/api/pair', {
           firstName: firstNameForSend,
@@ -61,6 +59,25 @@
       },
       cutTooLongString(str) {
         return str.split('').slice(0, 255).join('');
+      },
+
+      handleSubmit() {
+        if (this.formstate.$invalid) return;
+
+        this.submitForm(this.model, this.file);
+      },
+      handleFileChange(e) {
+        this.file = e.target.files[0];
+
+        const formData = new FormData();
+
+        formData.append('file', this.file);
+
+        axios.post('/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
       }
     }
   };
@@ -68,9 +85,9 @@
 
 <template>
   <div class="create">
-    <div class="form">
-      <vue-form :state="formstate" @submit.prevent="handleSubmit">
-        <validate tag="label">
+    <div class="wrapper">
+      <vue-form :state="formstate" class="form" @submit.prevent="handleSubmit">
+        <validate class="line">
           <label for="firstName">
             First name
           </label>
@@ -78,6 +95,7 @@
           <input
             id="firstName"
             v-model="model.firstName"
+            class="input"
             required
             name="firstName"
             maxlength="255"
@@ -86,7 +104,7 @@
           <form-field-messages name="firstName" />
         </validate>
 
-        <validate tag="label">
+        <validate class="line">
           <label for="secondName">
             Second name
           </label>
@@ -94,6 +112,7 @@
           <input
             id="secondName"
             v-model="model.secondName"
+            class="input"
             name="secondName"
             required
             maxlength="255"
@@ -102,7 +121,7 @@
           <form-field-messages name="secondName" />
         </validate>
 
-        <validate tag="label">
+        <validate class="line">
           <label for="date">
             Relationship start date
           </label>
@@ -110,6 +129,7 @@
           <imask-input
             id="date"
             v-model="model.date"
+            class="input"
             name="date"
             :mask="Date"
             :unmask="true"
@@ -120,7 +140,16 @@
           <form-field-messages name="date" />
         </validate>
 
-        <button type="submit">
+        <div class="line">
+          <input
+            type="file"
+            accept="image/*"
+            name="img"
+            @change="handleFileChange"
+          >
+        </div>
+
+        <button type="submit" class="submit-button">
           Submit
         </button>
       </vue-form>
@@ -142,7 +171,55 @@
     @include bg;
   }
 
+  .wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 960px;
+    height: 400px;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    max-width: 330px;
+    width: 100%;
+  }
+
   .link {
     margin-top: 15px;
+  }
+
+  .input {
+    outline: none;
+    border: 0;
+    border-radius: 4px;
+    padding: 7px;
+  }
+
+  .line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 9px;
+
+    &:nth-child(1) {
+      margin-top: 0;
+    }
+
+    > div {
+      display: none;
+    }
+  }
+
+  .submit-button {
+    margin-top: 15px;
+    border: 0;
+    padding: 11px;
+    border-radius: 7px;
+    font-size: 1rem;
+    @include hover-default;
   }
 </style>
