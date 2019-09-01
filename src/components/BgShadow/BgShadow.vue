@@ -16,7 +16,7 @@
     left: 0;
     height: 100vh;
     width: 100%;
-    background: #fff;
-    opacity: 0.03;
+    background: #000;
+    opacity: 0.2;
   }
 </style>
