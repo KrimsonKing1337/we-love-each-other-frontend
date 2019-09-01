@@ -16,6 +16,7 @@
       return {
         newId: 0,
         newLink: '',
+        linkIsReady: false,
         formstate: {},
         model: {
           firstName: '',
@@ -34,8 +35,6 @@
         const firstNameForSend = firstName.length > 255 ? this.cutTooLongString(firstName) : firstName;
         const secondNameForSend = secondName.length > 255 ? this.cutTooLongString(secondName) : secondName;
 
-        console.log('file', file); // todo: send file to server
-
         axios.post('/api/pair', {
           firstName: firstNameForSend,
           secondName: secondNameForSend,
@@ -47,7 +46,17 @@
             this.newId = data.id;
             this.newLink = `${window.location.origin}/id${this.newId}`;
 
-            console.log('data', data);
+            return data.id;
+          })
+          .then((id) => {
+            return this.submitFile(id);
+          })
+          .then((resp) => {
+            const { data } = resp;
+
+            console.log('submit file data', data);
+
+            this.linkIsReady = true;
           })
           .catch((err) => {
             this.$toasted.show(err, {
@@ -60,6 +69,17 @@
       cutTooLongString(str) {
         return str.split('').slice(0, 255).join('');
       },
+      submitFile(id) {
+        const formData = new FormData();
+
+        formData.append('file', this.file);
+
+        return axios.put(`/api/pair/${id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+      },
 
       handleSubmit() {
         if (this.formstate.$invalid) return;
@@ -68,16 +88,9 @@
       },
       handleFileChange(e) {
         this.file = e.target.files[0];
-
-        const formData = new FormData();
-
-        formData.append('file', this.file);
-
-        axios.post('/api/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+      },
+      handleCreateAnotherOneButtonClick() {
+        window.location.reload();
       }
     }
   };
@@ -86,7 +99,12 @@
 <template>
   <div class="create">
     <div class="wrapper">
-      <vue-form :state="formstate" class="form" @submit.prevent="handleSubmit">
+      <vue-form
+        v-if="!linkIsReady"
+        :state="formstate"
+        class="form"
+        @submit.prevent="handleSubmit"
+      >
         <validate class="line">
           <label for="firstName">
             First name
@@ -149,17 +167,23 @@
           >
         </div>
 
-        <button type="submit" class="submit-button">
+        <button type="submit" class="button">
           Submit
         </button>
       </vue-form>
-    </div>
 
-    <div v-if="newId" class="link">
-      Your personal link is
-      <router-link :to="`/id${newId}`">
-        {{ newLink }}
-      </router-link>
+      <div v-if="linkIsReady" class="link-is-ready">
+        <div class="link">
+          Your personal link is
+          <router-link :to="`/id${newId}`">
+            {{ newLink }}
+          </router-link>
+        </div>
+
+        <button type="button" class="button" @click="handleCreateAnotherOneButtonClick">
+          Create another one
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -169,6 +193,7 @@
 
   .create {
     @include bg;
+    background-image: url("/img/bg.jpg");
   }
 
   .wrapper {
@@ -214,12 +239,19 @@
     }
   }
 
-  .submit-button {
+  .button {
     margin-top: 15px;
     border: 0;
     padding: 11px;
     border-radius: 7px;
     font-size: 1rem;
     @include hover-default;
+  }
+
+  .link-is-ready {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 </style>

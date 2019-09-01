@@ -1,10 +1,11 @@
 <script>
   import axios from 'axios';
   import { DateTime, Interval } from 'luxon';
+  import BgShadow from 'components/BgShadow';
 
   export default {
     name: 'Main',
-
+    components: { BgShadow },
     data() {
       return {
         firstName: '',
@@ -13,7 +14,8 @@
         secondLetter: '',
         date: 0,
         fromNow: '',
-        interval: null
+        interval: null,
+        bg: '/img/bg.jpg'
       };
     },
 
@@ -25,6 +27,7 @@
           const { data } = resp;
 
           this.performDataForPrint(data.data);
+          this.setBg(data.data);
 
           console.log('data', data);
         })
@@ -60,6 +63,13 @@
         const luxonInterval = Interval.fromDateTimes(luxonDate, DateTime.local());
 
         this.fromNow = luxonInterval.count('days');
+      },
+      setBg(data) {
+        const { imgSrc } = data;
+
+        if (!imgSrc) return;
+
+        this.bg = imgSrc;
       }
     }
 
@@ -67,7 +77,9 @@
 </script>
 
 <template>
-  <div class="main">
+  <div class="main" :style="{'background-image': `url(${bg})`}">
+    <BgShadow />
+
     <div class="wrapper">
       <div class="left-side">
         <div class="empty" />
