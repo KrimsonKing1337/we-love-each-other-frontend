@@ -51,7 +51,7 @@
 
     methods: {
       performDataForPrint(data) {
-        const { firstName, secondName, date } = data;
+        const { first_name: firstName, second_name: secondName, date } = data;
 
         this.firstName = firstName;
         this.secondName = secondName;
@@ -65,7 +65,7 @@
         this.fromNow = luxonInterval.count('days');
       },
       setBg(data) {
-        const { imgSrc } = data;
+        const { img_src: imgSrc } = data;
 
         if (!imgSrc) return;
 
