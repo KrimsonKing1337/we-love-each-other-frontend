@@ -44,6 +44,7 @@
     "app-root-path": "^2.0.1",
     "axios": "^0.18.0",
     "babel-runtime": "^6.26.0",
+    "epic-spinners": "^1.1.0",
     "lodash-es": "^4.17.4",
     "luxon": "^1.17.2",
     "reset-css": "^2.2.1",

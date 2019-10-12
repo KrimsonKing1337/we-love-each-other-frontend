@@ -3,13 +3,15 @@
   import axios from 'axios';
   import { DateTime } from 'luxon';
   import FormFieldMessages from './components/FormFieldMessages';
+  import {HalfCircleSpinner} from 'epic-spinners';
 
   export default {
     component: 'Create',
 
     components: {
       FormFieldMessages,
-      'imask-input': IMaskComponent
+      'imask-input': IMaskComponent,
+      HalfCircleSpinner
     },
 
     data() {
@@ -23,7 +25,8 @@
           secondName: '',
           date: ''
         },
-        file: null
+        file: null,
+        loading: false
       }
     },
 
@@ -34,6 +37,8 @@
 
         const firstNameForSend = firstName.length > 255 ? this.cutTooLongString(firstName) : firstName;
         const secondNameForSend = secondName.length > 255 ? this.cutTooLongString(secondName) : secondName;
+
+        this.loading = true;
 
         axios.post('/api/pair', {
           firstName: firstNameForSend,
@@ -64,6 +69,9 @@
             });
 
             console.error(err);
+          })
+          .finally(() => {
+            this.loading = false;
           });
       },
       cutTooLongString(str) {
@@ -168,7 +176,16 @@
         </div>
 
         <button type="submit" class="button">
-          Submit
+          <span v-if="!loading">
+            Submit
+          </span>
+
+          <half-circle-spinner
+            v-else
+            :animation-duration="1000"
+            :size="21"
+            :color="'#252525'"
+          />
         </button>
       </vue-form>
 
@@ -240,6 +257,9 @@
   }
 
   .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 15px;
     border: 0;
     padding: 11px;
