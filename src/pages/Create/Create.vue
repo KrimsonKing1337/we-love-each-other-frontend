@@ -25,12 +25,32 @@
           secondName: '',
           date: ''
         },
-        file: null,
-        loading: false
+        file: [],
+        loading: false,
+        loaderTimer: null
       }
     },
 
     methods: {
+      /**
+       *
+       * @param loadingStatus {Boolean}
+       */
+      showLoadingIfRequestTooLong(loadingStatus) {
+        if (this.loaderTimer || (loadingStatus === false && this.loaderTimer)) {
+          clearTimeout(this.loaderTimer);
+        }
+
+        if (loadingStatus === false) {
+          this.loading = false;
+        }
+
+        this.loaderTimer = setTimeout(() => {
+          if (loadingStatus === false) return;
+
+          this.loading = true;
+        }, 1500);
+      },
       submitForm(data, file) {
         const {firstName, secondName, date} = data;
         const dateUTC = DateTime.fromFormat(date, 'dd.MM.yyyy').toISODate();
@@ -38,7 +58,7 @@
         const firstNameForSend = firstName.length > 255 ? this.cutTooLongString(firstName) : firstName;
         const secondNameForSend = secondName.length > 255 ? this.cutTooLongString(secondName) : secondName;
 
-        this.loading = true;
+        this.showLoadingIfRequestTooLong(true);
 
         axios.post('/api/pair', {
           firstName: firstNameForSend,
@@ -71,7 +91,7 @@
             console.error(err);
           })
           .finally(() => {
-            this.loading = false;
+            this.showLoadingIfRequestTooLong(false);
           });
       },
       cutTooLongString(str) {
@@ -125,6 +145,7 @@
             required
             name="firstName"
             maxlength="255"
+            autocomplete="off"
           >
 
           <form-field-messages name="firstName" />
@@ -142,6 +163,7 @@
             name="secondName"
             required
             maxlength="255"
+            autocomplete="off"
           >
 
           <form-field-messages name="secondName" />
@@ -161,6 +183,7 @@
             :unmask="true"
             required
             maxlength="255"
+            autocomplete="off"
           />
 
           <form-field-messages name="date" />
@@ -171,6 +194,7 @@
             type="file"
             accept="image/*"
             name="img"
+            autocomplete="off"
             @change="handleFileChange"
           >
         </div>
